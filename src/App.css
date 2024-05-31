@@ -1,7 +1,57 @@
-html,body{
+*,*::after,*::before{
+    box-sizing: border-box;
+}
+html,body, .wrapper{
     min-height: 100vh;
 }
-
-body{
+.wrapper{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+ul{
+    list-style: none;
+}
+body, ul{
     margin: 0;
+}
+ul{
+    padding: 0;
+}
+button{
+    cursor: pointer;
+}
+
+.board__game{
+    border: 5px solid #6A4026;
+
+    display: grid;
+    grid-template-columns: repeat(8, 64px);
+    grid-template-rows: repeat(8, 64px);
+}
+
+.game-board__link button{
+    position: relative;
+    
+    border: 0;
+    padding: 0;
+
+    background-color: #6A4026;
+
+    height: 100%;
+    width: 100%;
+}
+.game-board__link.white button{
+    background-color: #F6DBB4;
+}
+
+.game-board__link img{
+    width: 85%;
+    height: 85%;
+
+    position: absolute;
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
 }
