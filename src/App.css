@@ -1,6 +1,10 @@
 *,*::after,*::before{
     box-sizing: border-box;
 }
+body{
+    font-family: "REM", sans-serif;
+    font-weight: 400;
+}
 html,body, .wrapper{
     min-height: 100vh;
 }
@@ -22,10 +26,40 @@ button{
     cursor: pointer;
 }
 
+.board{
+    display: grid;
+    align-items: center;
+    grid-template-areas: 
+    "board board ver"
+    "board board ver"
+    "horiz horiz .";
+}
+
+.board__coordline{
+    display: grid;
+}
+.board__coordline.horizontal{
+    grid-template-columns: repeat(8, 64px);
+    justify-content: center;
+    grid-area: horiz;
+
+    text-align: center;
+}
+.board__coordline.vertical{
+    grid-template-rows: repeat(8, 64px);
+    align-items: center;
+    grid-area: ver;
+}
+
+.coordline-board__item{
+    font-size: 18px;
+}
+
 .board__game{
     border: 5px solid #6A4026;
 
     display: grid;
+    grid-area: board;
     grid-template-columns: repeat(8, 64px);
     grid-template-rows: repeat(8, 64px);
 }
