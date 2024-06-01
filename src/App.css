@@ -70,18 +70,48 @@ button{
     border: 0;
     padding: 0;
 
-    background-color: #6A4026;
-
     height: 100%;
     width: 100%;
+
+    transition: border-color 0.3s linear;
+}
+.game-board__link.black button{
+    border: 5px solid #6A4026;
+    background-color: #6A4026;
 }
 .game-board__link.white button{
+    border: 5px solid #F6DBB4;
     background-color: #F6DBB4;
+}
+.game-board__link:not(._has-figure)._available button::after{
+    content: "";
+    background-color: #000;
+    border-radius: 50%;
+
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    width: 12px;
+    height: 12px;
+}
+.game-board._white-turn .game-board__link:not(._has-figure)._available button::after{
+    background-color: #fff;
+}
+
+.game-board__link._active._figure-black button,
+.game-board__link._has-figure._available button{
+    border: 5px solid #000;
+}
+.game-board__link._active._figure-white button,
+.game-board._white-turn .game-board__link._has-figure._available button{
+    border: 5px solid #fff;
 }
 
 .game-board__link img{
-    width: 85%;
-    height: 85%;
+    width: 90%;
+    height: 90%;
 
     position: absolute;
     left: 50%;

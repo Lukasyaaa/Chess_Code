@@ -6,7 +6,6 @@ export class Figure{
     private color : Colors;
     private type : FiguresType = FiguresType.Default; 
     private src : string = "";
-    private cell : Cell;
 
     public setType(type : FiguresType) : void{
         this.type = type;
@@ -22,12 +21,6 @@ export class Figure{
         return this.color;
     }
 
-    public setCell(cell : Cell) : void{
-        this.cell = cell;
-    }
-    public getCell() : Cell{
-        return this.cell;
-    }
 
     public setSrc(src : string) : void{
         this.src = src;
@@ -36,9 +29,7 @@ export class Figure{
         return this.src;
     }
 
-    constructor(color : Colors, cell : Cell){
+    constructor(color : Colors){
         this.color = color;
-        this.cell = cell;
-        this.cell.setFigure(this);
     }
 }

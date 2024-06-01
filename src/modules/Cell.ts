@@ -3,12 +3,18 @@ import { Figure } from "./figures/Figure";
 import Board from "./Board";
 
 class Cell{
-    readonly board : Board;
     readonly color : Colors;
     readonly x : number;
     readonly y : number;
+    private available : boolean = false;
     private figure : Figure | null;
 
+
+    public getCopyCell() : Cell{
+        let copyCell = new Cell(this.color, this.x, this.y, this.figure);
+        copyCell.available = this.available;
+        return copyCell;
+    }
 
     public getColor() : Colors{
         return this.color;
@@ -21,6 +27,16 @@ class Cell{
         return this.y;
     }
 
+    public isAvailable() : boolean{
+        return this.available;
+    }
+    public makeAvailable() : void{
+        this.available = true;
+    }
+    public makeUnAvailable() : void{
+        this.available = false;
+    }
+
     public getFigure() : Figure | null{
         return this.figure;
     }
@@ -31,8 +47,7 @@ class Cell{
         this.figure = null;
     }
 
-    constructor(board : Board, color : Colors, x : number, y : number, figure : Figure | null = null){
-        this.board = board;
+    constructor(color : Colors, x : number, y : number, figure : Figure | null = null){
         this.color = color;
         this.x = x;
         this.y = y;
