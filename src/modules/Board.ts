@@ -300,24 +300,26 @@ class Board{
                 const end : number = 2 + Number((figureCell.getColor() === Colors.White && cell.getY() === 6) ||
                     (figureCell.getColor() === Colors.Black && cell.getY() === 1));
                 const enemyColor = Number(!Boolean(figureCell.getColor()));
-                for(let yShift : number = 1 * pawnDir; yShift !== end * pawnDir; yShift+=pawnDir){
-                    if(yShift + cell.getY() !== -1 && yShift + cell.getY() < 8 && 
-                    !this.cells[yShift + cell.getY()][cell.getX()].getFigure()){
-                        this.cells[yShift + cell.getY()][cell.getX()].makeAvailable();
-                    }else{
-                        break;
-                    }
-                }
-
-                for(let xShift : number = 1; xShift !== -3; xShift -= 2){
-                    if(xShift + cell.getX() < 8 && xShift + cell.getX() != -1){
-                        if(this.cells[cell.getY() + pawnDir][cell.getX() + xShift].getFigure()?.getColor() === enemyColor){
-                            this.cells[cell.getY() + pawnDir][cell.getX() + xShift].makeAvailable();
+                if(pawnDir + cell.getY() !== -1 && pawnDir + cell.getY() < 8){
+                    for(let yShift : number = 1 * pawnDir; yShift !== end * pawnDir; yShift+=pawnDir){
+                        if(yShift + cell.getY() !== -1 && yShift + cell.getY() < 8 && 
+                        !this.cells[yShift + cell.getY()][cell.getX()].getFigure()){
+                            this.cells[yShift + cell.getY()][cell.getX()].makeAvailable();
+                        }else{
+                            break;
                         }
                     }
-                }
-                if(needEnPassanat){
-                    this.canEnPassanat(cell);
+
+                    for(let xShift : number = 1; xShift !== -3; xShift -= 2){
+                        if(xShift + cell.getX() < 8 && xShift + cell.getX() !== -1){
+                            if(this.cells[cell.getY() + pawnDir][cell.getX() + xShift].getFigure()?.getColor() === enemyColor){
+                                this.cells[cell.getY() + pawnDir][cell.getX() + xShift].makeAvailable();
+                            }
+                        }
+                    }
+                    if(needEnPassanat){
+                        this.canEnPassanat(cell);
+                    }
                 }
                 break;
             }

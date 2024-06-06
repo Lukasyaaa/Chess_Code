@@ -118,7 +118,7 @@ ul{
     width: 12px;
     height: 12px;
 }
-.game-board._white-turn .game-board__link:not(._has-figure)._available button::after{
+.board._white-turn .game-board__link:not(._has-figure)._available button::after{
     background-color: #fff;
 }
 
@@ -127,8 +127,13 @@ ul{
     border: 5px solid #000;
 }
 .game-board__link._active._figure-white button,
-.game-board._white-turn .game-board__link._has-figure._available button{
+.board._white-turn .game-board__link._has-figure._available button{
     border: 5px solid #fff;
+}
+
+.board._black-check .game-board__link._king-black img,
+.board._white-check .game-board__link._king-white img{
+    filter: drop-shadow(0 0 5px #990000);
 }
 
 .game-board__link img{
@@ -142,7 +147,7 @@ ul{
     transform: translate(-50%, -50%);
 }
 
-.lose-window{
+.lose-window, .choose-figure{
     background-color: rgba(0, 0, 0, 0.9);
 
     position: absolute;
@@ -158,7 +163,7 @@ ul{
     justify-content: center;
 }
 
-.lose-window__heading{
+.lose-window__heading, .choose-figure__heading{
     font-family: "REM", sans-serif;
     font-weight: 400;
     color: #fff;
@@ -178,4 +183,69 @@ ul{
     border-radius: 7px;
     background-color: #fff;
     box-shadow: 0 0 5px #fff;
+}
+
+.choose-figure__list{
+    display: flex;
+    flex-direction: column;
+}
+
+.choose-figure__link{
+    position: relative;
+}
+
+.choose-figure__link button:focus{
+    outline: none;
+}
+.choose-figure__link button{
+    background-color: transparent;
+    cursor: pointer;
+
+    position: relative;
+    z-index: 2;
+
+    border: 0;
+    padding: 7.5px 20px;
+
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+.choose-figure__link::after{
+    content: "";
+    border-width: 0;
+    border-color: #fff;
+    border-style: solid;
+    border-radius: 15px;
+    background-color: transparent;
+
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    width: 0;
+    height: 0;
+    transition: width 0.3s linear,
+    height 0.3s linear,
+    border-width 0.3s linear;
+}
+.choose-figure__link._active::after,
+.choose-figure__link button:focus + .choose-figure__link::after{
+    border-width: 5px;
+    width: 100%;
+    height: 100%;
+}
+
+.choose-figure__link img{
+    width: 64px;
+    height: 64px;
+}
+
+.choose-figure__link span{
+    font-family: "REM", sans-serif;
+    font-weight: 400;
+    color: #fff;
+    font-size: 20px;
 }

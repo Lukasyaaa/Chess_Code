@@ -5,6 +5,11 @@ import { CoordLine } from "./CoordLine";
 import { Colors } from "../modules/vars/Colors";
 import { Cell } from "./Cell";
 import cellClass  from "../modules/Cell";
+import { FiguresType } from "../modules/vars/FiguresType";
+import { Queen } from "../modules/figures/Queen";
+import { Knight } from "../modules/figures/Knight";
+import { Rook } from "../modules/figures/Rook";
+import { Bishop } from "../modules/figures/Bishop";
 
 interface setter<T>{
     value : T;
@@ -13,10 +18,42 @@ interface setter<T>{
 
 interface BoardProps{
     board : setter<BoardClass>
+    appearPicker : setter<boolean>
+    choosedFigure : setter<FiguresType>
 }
 
-export const Board : FC<BoardProps> = ({board}) =>{
+export const Board : FC<BoardProps> = ({board, appearPicker, choosedFigure}) =>{
     let [numberActiveCell, setNumberActiveCell] = useState<number>(-1)
+
+    if(choosedFigure.value !== FiguresType.Default){
+        const prevPlayer : Colors = Number(!Boolean(board.value.getCurrentPlayer()));
+        let leaveCycle : boolean = false;
+        for(let y : number = 0; !leaveCycle && y < 8; y+=7){
+            for(let x : number = 0; x < 8; x++){
+                if(board.value.getCells()[y][x].getFigure()?.getColor() === prevPlayer &&
+                board.value.getCells()[y][x].getFigure()?.getType() === FiguresType.Pawn){
+                    console.log(choosedFigure.value);
+                    switch(choosedFigure.value){
+                        case FiguresType.Queen:
+                            board.value.getCells()[y][x].setFigure(new Queen(prevPlayer));
+                            break;
+                        case FiguresType.Knight:
+                            board.value.getCells()[y][x].setFigure(new Knight(prevPlayer));
+                            break;
+                        case FiguresType.Rook:
+                            board.value.getCells()[y][x].setFigure(new Rook(prevPlayer));
+                            break;
+                        default:
+                            board.value.getCells()[y][x].setFigure(new Bishop(prevPlayer));
+                            break;
+                    }
+                    leaveCycle = true;
+                    break;
+                }
+            }
+        }
+        choosedFigure.set(FiguresType.Default);
+    }
 
     const changeBoard = () =>{
         const copyBoard = board.value.getCopyBoard();
@@ -24,7 +61,6 @@ export const Board : FC<BoardProps> = ({board}) =>{
     }
 
     const clickCell = (e : React.MouseEvent<HTMLUListElement>) : void =>{
-        debugger;
         if(e.target !== e.currentTarget){
             let clicked : any = e.target;
             while(!clicked.hasAttribute("data-id")){
@@ -53,6 +89,9 @@ export const Board : FC<BoardProps> = ({board}) =>{
                     setNumberActiveCell(-1);
                     board.value.moveFigure(activeCell, clickedCell);
                     board.value.nullingAvailable();
+                    if(activeCell.getFigure()?.getType() === FiguresType.Pawn && (!clickedCell.getY() || clickedCell.getY() === 7)){
+                        appearPicker.set(true);
+                    }
                 }else if(clickedCell.getFigure()?.getColor() === activeCell.getFigure()?.getColor()){
                     setNumberActiveCell(Number(clicked.getAttribute("data-id")));
                     board.value.nullingAvailable();
@@ -66,15 +105,23 @@ export const Board : FC<BoardProps> = ({board}) =>{
     const letters : string[] = ["A", "B", "C", "D", "E", "F", "G", "H"];
     const numbers : string[] = ["1", "2", "3", "4", "5", "6", "7", "8"];
 
+    let classes : string[] = ["board", `_${(!board.value.getCurrentPlayer()) ? "black" : "white"}-turn`];
+
+    if(board.value.getCheck() !== null){
+        classes.push(`_${(!board.value.getCheck()) ? "black" : "white"}-check`)
+    }
+
     return(
-        <main className={["board", `_${(!board.value.getCurrentPlayer()) ? "black" : "white"}-turn`].join(" ")}>
+        <main className={classes.join(" ")}>
+            <h2 className="board__heading_turn">{`${(!board.value.getCurrentPlayer()) ? "Black" : "White"} turn`}</h2>
             <ul 
                 onClick={(e) => clickCell(e)} 
-                className={["board__game", "game-board", `_${(board.value.getCurrentPlayer()) ? "white" : "black"}-turn`].join(" ")}
+                className="board__game game-board"
             >
                 {board.value.getCells().map((row, rowIndex) => 
                     <React.Fragment key={rowIndex}>{row.map(cell => 
                         <Cell 
+                            tabIndex = {((appearPicker) ? -1 : cell.getY() * 8 + cell.getX())}
                             key = {cell.getY() * 8 + cell.getX()}
                             id = {cell.getY() * 8 + cell.getX()}
                             color = {cell.getColor()} 
@@ -85,7 +132,6 @@ export const Board : FC<BoardProps> = ({board}) =>{
                     )}</React.Fragment>
                 )}
             </ul>
-            <h2 className="board__heading_turn">{`${(!board.value.getCurrentPlayer()) ? "Black" : "White"} turn`}</h2>
             <CoordLine links={letters} dir={Direction.Horizontal} />
             <CoordLine links={numbers} dir={Direction.Vertical} />
         </main>
