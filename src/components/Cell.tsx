@@ -10,7 +10,7 @@ interface CellProps{
     isActive : boolean,
 }
 
-export const Cell : FC<CellProps> = ({id, color, figure, isAvailable ,isActive}) =>{
+export const Cell : FC<CellProps> = ({id, color, figure, isAvailable, isActive}) =>{
     let classes : string[] = ["game-board__link", ((!color) ? "black" : "white")];
     if(isActive){
         classes.push("_active");

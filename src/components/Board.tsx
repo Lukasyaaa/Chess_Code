@@ -16,7 +16,6 @@ interface BoardProps{
 }
 
 export const Board : FC<BoardProps> = ({board}) =>{
-    let [currenPlayer, setCurrentPlayer] = useState<Colors>(Colors.White)
     let [numberActiveCell, setNumberActiveCell] = useState<number>(-1)
 
     const changeBoard = () =>{
@@ -25,6 +24,7 @@ export const Board : FC<BoardProps> = ({board}) =>{
     }
 
     const clickCell = (e : React.MouseEvent<HTMLUListElement>) : void =>{
+        debugger;
         if(e.target !== e.currentTarget){
             let clicked : any = e.target;
             while(!clicked.hasAttribute("data-id")){
@@ -35,9 +35,9 @@ export const Board : FC<BoardProps> = ({board}) =>{
 
             //Если Нету Активной Ячейки
             if(numberActiveCell === -1){
-                if(clickedCell.getFigure()?.getColor() === currenPlayer){
+                if(clickedCell.getFigure()?.getColor() === board.value.getCurrentPlayer()){
                     setNumberActiveCell(Number(clicked.getAttribute("data-id")));
-                    board.value.answerIsAvailable(clickedCell);
+                    board.value.answerIsAvailable(clickedCell, false, true, true);
                     changeBoard();
                 }
             }else{
@@ -50,14 +50,13 @@ export const Board : FC<BoardProps> = ({board}) =>{
                     setNumberActiveCell(-1);
                     board.value.nullingAvailable();
                 }else if(clickedCell.isAvailable()){
+                    setNumberActiveCell(-1);
                     board.value.moveFigure(activeCell, clickedCell);
                     board.value.nullingAvailable();
-                    setNumberActiveCell(-1);
-                    setCurrentPlayer((currenPlayer) ? Colors.Black : Colors.White);
                 }else if(clickedCell.getFigure()?.getColor() === activeCell.getFigure()?.getColor()){
                     setNumberActiveCell(Number(clicked.getAttribute("data-id")));
                     board.value.nullingAvailable();
-                    board.value.answerIsAvailable(clickedCell);
+                    board.value.answerIsAvailable(clickedCell, false, true, true);
                 }
                 changeBoard();
             }
@@ -68,10 +67,10 @@ export const Board : FC<BoardProps> = ({board}) =>{
     const numbers : string[] = ["1", "2", "3", "4", "5", "6", "7", "8"];
 
     return(
-        <main className="board">
+        <main className={["board", `_${(!board.value.getCurrentPlayer()) ? "black" : "white"}-turn`].join(" ")}>
             <ul 
                 onClick={(e) => clickCell(e)} 
-                className={["board__game", "game-board", `_${(currenPlayer) ? "white" : "black"}-turn`].join(" ")}
+                className={["board__game", "game-board", `_${(board.value.getCurrentPlayer()) ? "white" : "black"}-turn`].join(" ")}
             >
                 {board.value.getCells().map((row, rowIndex) => 
                     <React.Fragment key={rowIndex}>{row.map(cell => 
@@ -86,6 +85,7 @@ export const Board : FC<BoardProps> = ({board}) =>{
                     )}</React.Fragment>
                 )}
             </ul>
+            <h2 className="board__heading_turn">{`${(!board.value.getCurrentPlayer()) ? "Black" : "White"} turn`}</h2>
             <CoordLine links={letters} dir={Direction.Horizontal} />
             <CoordLine links={numbers} dir={Direction.Vertical} />
         </main>

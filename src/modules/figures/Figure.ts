@@ -7,6 +7,13 @@ export class Figure{
     private type : FiguresType = FiguresType.Default; 
     private src : string = "";
 
+    public getCopy() : Figure{
+        let copyFigure : Figure = new Figure(this.color);
+        copyFigure.type = this.type;
+        copyFigure.src = this.src;
+        return copyFigure; 
+    }
+
     public setType(type : FiguresType) : void{
         this.type = type;
     }
