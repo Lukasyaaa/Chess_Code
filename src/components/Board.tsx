@@ -1,11 +1,11 @@
 import React, { FC, useState } from "react";
 import BoardClass from "../modules/Board";
-import { Direction } from "../modules/vars/Directions"
+import { Colors, Consent } from "../modules/vars";
+import { FiguresType } from "../modules/vars";
+import { Direction } from "../modules/vars"
 import { CoordLine } from "./CoordLine";
-import { Colors } from "../modules/vars/Colors";
 import { Cell } from "./Cell";
 import cellClass  from "../modules/Cell";
-import { FiguresType } from "../modules/vars/FiguresType";
 import { Queen } from "../modules/figures/Queen";
 import { Knight } from "../modules/figures/Knight";
 import { Rook } from "../modules/figures/Rook";
@@ -19,21 +19,21 @@ interface setter<T>{
 interface BoardProps{
     board : setter<BoardClass>
     appearPicker : setter<boolean>
-    choosedFigure : setter<FiguresType>
+    choosed : setter<FiguresType | Consent>
 }
 
-export const Board : FC<BoardProps> = ({board, appearPicker, choosedFigure}) =>{
+export const Board : FC<BoardProps> = ({board, appearPicker, choosed}) =>{
     let [numberActiveCell, setNumberActiveCell] = useState<number>(-1)
 
-    if(choosedFigure.value !== FiguresType.Default){
+    if(choosed.value !== FiguresType.Default && choosed.value !== Consent.Yes && choosed.value !== Consent.No){
         const prevPlayer : Colors = Number(!Boolean(board.value.getCurrentPlayer()));
         let leaveCycle : boolean = false;
         for(let y : number = 0; !leaveCycle && y < 8; y+=7){
             for(let x : number = 0; x < 8; x++){
                 if(board.value.getCells()[y][x].getFigure()?.getColor() === prevPlayer &&
                 board.value.getCells()[y][x].getFigure()?.getType() === FiguresType.Pawn){
-                    console.log(choosedFigure.value);
-                    switch(choosedFigure.value){
+                    console.log(choosed.value);
+                    switch(choosed.value){
                         case FiguresType.Queen:
                             board.value.getCells()[y][x].setFigure(new Queen(prevPlayer));
                             break;
@@ -52,11 +52,11 @@ export const Board : FC<BoardProps> = ({board, appearPicker, choosedFigure}) =>{
                 }
             }
         }
-        choosedFigure.set(FiguresType.Default);
+        choosed.set(FiguresType.Default);
     }
 
     const changeBoard = () =>{
-        const copyBoard = board.value.getCopyBoard();
+        const copyBoard : BoardClass = board.value.getCopyBoard();
         board.set(copyBoard);
     }
 

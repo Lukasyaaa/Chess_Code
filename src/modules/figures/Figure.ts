@@ -1,6 +1,6 @@
 import Cell from "../Cell";
-import { Colors } from "../vars/Colors";
-import { FiguresType } from "../vars/FiguresType";
+import { Colors } from "../vars";
+import { FiguresType } from "../vars";
 
 export class Figure{
     private color : Colors;

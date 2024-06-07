@@ -1,5 +1,5 @@
 import React, {FC} from "react";
-import { Direction } from "../modules/vars/Directions";
+import { Direction } from "../modules/vars";
 
 interface CoordLineProps{
     links : string[];

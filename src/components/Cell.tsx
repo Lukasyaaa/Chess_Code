@@ -1,7 +1,7 @@
 import React, { FC } from "react";
-import { Colors } from "../modules/vars/Colors";
+import { Colors } from "../modules/vars";
 import { Figure } from "../modules/figures/Figure";
-import { FiguresType } from "../modules/vars/FiguresType";
+import { FiguresType } from "../modules/vars";
 
 interface CellProps{
     tabIndex : number,

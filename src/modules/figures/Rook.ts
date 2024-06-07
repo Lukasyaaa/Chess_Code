@@ -1,7 +1,7 @@
 import blackLogo from "../../img/black-rook.png"
 import whiteLogo from "../../img/white-rook.png"
-import { Colors } from "../vars/Colors"
-import { FiguresType } from "../vars/FiguresType"
+import { Colors } from "../vars"
+import { FiguresType } from "../vars"
 import { Figure } from "./Figure"
 
 export class Rook extends Figure{

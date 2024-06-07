@@ -1,13 +1,13 @@
 import Cell from "./Cell"
-import { Colors } from "./vars/Colors";
-import {Pawn} from "./figures/Pawn"
-import {Rook} from "./figures/Rook"
+import { Colors } from "./vars";
+import { FiguresType } from "./vars";
+import { Figure } from "./figures/Figure";
+import { Pawn } from "./figures/Pawn"
+import { Rook } from "./figures/Rook"
 import { Knight } from "./figures/Knight";
 import { Bishop } from "./figures/Bishop";
 import { Queen } from "./figures/Queen";
 import { King } from "./figures/King";
-import { FiguresType } from "./vars/FiguresType";
-import { Figure } from "./figures/Figure";
 
 enum Direction{
     Diagonal = -1,
@@ -34,11 +34,13 @@ interface move{
 }
 
 class Board{
-    private cells         : Cell[][] = [];
-    private history       : move[] = [];
-    private currentPlayer : Colors = Colors.White
-    private check         : Colors | null = null;
-    private checkmate     : Colors | null = null;
+    private cells             : Cell[][] = [];
+    private history           : move[] = [];
+    private currentPlayer     : Colors = Colors.White
+    private check             : Colors | null = null;
+    private checkmate         : Colors | null = null;
+    private blackEatedFigures : Figure[] = [];
+    private whiteEatedFigures : Figure[] = [];
 
     constructor(){
         this.create();
@@ -51,11 +53,16 @@ class Board{
         newBoard.currentPlayer = this.currentPlayer;
         newBoard.check = this.check;
         newBoard.checkmate = this.checkmate;
+        newBoard.blackEatedFigures = this.blackEatedFigures;
+        newBoard.whiteEatedFigures = this.whiteEatedFigures;
         return newBoard;
     }
 
     public getCells() : Cell[][]{
         return this.cells;
+    }
+    public getHistory() : move[]{
+        return this.history;
     }
     public getCurrentPlayer() : Colors{
         return this.currentPlayer;
@@ -65,6 +72,12 @@ class Board{
     }
     public getCheckmate() : Colors | null{
         return this.checkmate;
+    }
+    public getBlackEatedFigures() : Figure[]{
+        return this.blackEatedFigures;
+    }
+    public getWhiteEatedFigures() : Figure[]{
+        return this.whiteEatedFigures;
     }
 
     private create() : void{
@@ -194,7 +207,7 @@ class Board{
             const enemyColor : Colors = Number(!Boolean(pawn.getColor()));
             const lastMove : move = this.history[this.history.length - 1];
             for(let dir : number = 1; dir !== -3; dir-=2){
-                if(pawnCell.getX() + dir < 8 && pawnCell.getX() + dir != -1){
+                if(pawnCell.getX() + dir < 8 && pawnCell.getX() + dir !== -1){
                     const figureNear : Figure | null = this.cells[pawnCell.getY()][pawnCell.getX() + dir].getFigure();
                     if(figureNear?.getType() === FiguresType.Pawn && figureNear?.getColor() === enemyColor &&
                     lastMove.newCoord.x === pawnCell.getX() + dir && lastMove.newCoord.y === pawnCell.getY()){
@@ -458,6 +471,7 @@ class Board{
     }
     public moveFigure(oldCell : Cell, newCell : Cell) : void{
         const figure = oldCell.getFigure();
+        const eatedFigure : Figure | null = this.cells[newCell.getY()][newCell.getX()].getFigure();
         if(figure){
             this.cells[newCell.getY()][newCell.getX()].setFigure(figure);
             this.cells[oldCell.getY()][oldCell.getX()].deleteFigure();
@@ -470,11 +484,32 @@ class Board{
                     this.cells[newCell.getY()][3].setFigure(rook);
                     this.cells[newCell.getY()][0].deleteFigure();
                 }
-            }else if(figure.getType() === FiguresType.Pawn){
+            }else if(figure.getType() === FiguresType.Pawn && !eatedFigure && 
+            (newCell.getX() === oldCell.getX() + 1 || newCell.getX() === oldCell.getX() - 1)){
                 const reversePawnDir : number = ((!figure.getColor()) ? -1 : 1)
+
+                const eatedPawn : Figure | null = this.cells[newCell.getY() + reversePawnDir][newCell.getX()].getFigure();
+                if(eatedPawn?.getColor() === Colors.White){
+                    this.whiteEatedFigures.push(eatedPawn);
+                }else if(eatedPawn?.getColor() === Colors.Black){
+                    this.blackEatedFigures.push(eatedPawn);
+                }
+
                 this.cells[newCell.getY() + reversePawnDir][newCell.getX()].deleteFigure();
             }
-            this.isKingUnderAttack(Number(!Boolean(figure.getColor())), figure.getColor())
+            if(eatedFigure){
+                if(eatedFigure.getColor() === Colors.White){
+                    this.whiteEatedFigures.push(eatedFigure);
+                }else{
+                    this.blackEatedFigures.push(eatedFigure);
+                }
+            }
+            this.isKingUnderAttack(figure.getColor(), Number(!Boolean(figure.getColor())))
+            if(this.check === null){
+                this.isKingUnderAttack(Number(!Boolean(figure.getColor())), figure.getColor())
+            }else{
+                this.checkmate = this.check;
+            }
             this.history.push({
                 figure:      {type: figure.getType(), color: figure.getColor()},
                 oldCoord:    {x: oldCell.getX(), y: oldCell.getY()},

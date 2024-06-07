@@ -1,4 +1,4 @@
-import { Colors } from "./vars/Colors";
+import { Colors } from "./vars";
 import { Figure } from "./figures/Figure";
 import Board from "./Board";
 
