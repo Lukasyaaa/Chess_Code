@@ -1,6 +1,5 @@
 import { Colors } from "./vars";
 import { Figure } from "./figures/Figure";
-import Board from "./Board";
 
 class Cell{
     readonly color : Colors;
@@ -8,7 +7,6 @@ class Cell{
     readonly y : number;
     private available : boolean = false;
     private figure : Figure | null;
-
 
     public getCopyCell() : Cell{
         let copyCell = new Cell(this.color, this.x, this.y, this.figure);

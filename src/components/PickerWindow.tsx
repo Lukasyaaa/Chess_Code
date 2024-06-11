@@ -1,50 +1,38 @@
-import React, { FC } from "react";
+import React, { FC, ForwardRefRenderFunction, forwardRef } from "react";
 import queenLogo from "../img/white-queen.png"
 import knightLogo from "../img/white-knight.png"
 import rookLogo from "../img/white-rook.png"
 import bishopLogo from "../img/white-bishop.png"
-import { ListType } from "../modules/vars";
-import { Consent } from "../modules/vars";
-import { FiguresType } from "../modules/vars";
+import { ListType, Consent, FiguresType, list } from "../modules/vars";
 
-interface htmlTag{
-    content : string;
-    value : Consent | FiguresType;
-}
-
-interface list{
-    type : ListType,
-    items : htmlTag[]
-}
-
-interface FigurePickerProps{
+interface PickerWindowProps{
     heading : string;
     list : list;
     setChoose : (newValue : FiguresType | Consent) => void;
-    setWindowState : (newValue : boolean) => void;
+    disappearPickerWin : () => void;
 }
 
-export const PickerWindow : FC<FigurePickerProps> = ({heading, list, setChoose, setWindowState}) =>{
+const PickerWindow : ForwardRefRenderFunction<HTMLUListElement, PickerWindowProps> = (props, ref) =>{
     const clickLink = (e : React.MouseEvent<HTMLUListElement>) =>{
         let clicked : any = e.target;
         while(!clicked.hasAttribute("data-value")){
             clicked = clicked.parentNode;
         }
         const clickedFigure : FiguresType = clicked.getAttribute("data-value");
-        setChoose(clickedFigure);
-        setWindowState(false);
+        props.setChoose(clickedFigure);
+        props.disappearPickerWin();
     } 
 
-    if(list.type === ListType.Figure){
+    if(props.list.type === ListType.Figure){
         const srces : string[] = [queenLogo, knightLogo, rookLogo, bishopLogo]
         return(
-            <div className="choose choose_figure">
-                <h2 className="choose__heading choose_figure__heading">{heading}</h2>
-                <ul className="choose__list choose_figure__list" onClick={(e) => clickLink(e)}>
-                    {list.items.map((link, index) =>
+            <div className="choose choose_figure modal-win">
+                <h2 className="choose__heading choose_figure__heading modal-win__heading">{props.heading}</h2>
+                <ul ref={ref} className="choose__list choose_figure__list modal-win__list" onClick={(e) => clickLink(e)}>
+                    {props.list.items.map((link, index) =>
                         <li 
                             key={index}
-                            className={`choose__link choose_figure__link${((index === 0) ? " _active" : "")}`} 
+                            className={`choose__link choose_figure__link modal-win__link${((index === 0) ? " _active" : "")}`} 
                             data-id={index} data-value={link.value}
                         >
                             <button type="button">
@@ -59,13 +47,13 @@ export const PickerWindow : FC<FigurePickerProps> = ({heading, list, setChoose, 
     }
 
     return(
-        <div className="choose choose_consent">
-            <h2 className="choose__heading choose_consent__heading">{heading}</h2>
-            <ul className="choose__list choose_consent__list" onClick={(e) => clickLink(e)}>
-                {list.items.map((link, index) =>
+        <div className="choose choose_consent modal-win">
+            <h2 className="choose__heading choose_consent__heading modal-win__heading">{props.heading}</h2>
+            <ul ref={ref} className="choose__list choose_consent__list modal-win__list" onClick={(e) => clickLink(e)}>
+                {props.list.items.map((link, index) =>
                     <li 
                         key={index}
-                        className={`choose__link choose_consent__link${((index === 0) ? " _active" : "")}`} 
+                        className={`choose__link choose_consent__link modal-win__link${((index === 0) ? " _active" : "")}`} 
                         data-id={index} data-value={link.value}
                     >
                         <button type="button">{link.content}</button>
@@ -75,3 +63,5 @@ export const PickerWindow : FC<FigurePickerProps> = ({heading, list, setChoose, 
         </div>
     )
 }
+
+export default forwardRef<HTMLUListElement, PickerWindowProps>(PickerWindow);

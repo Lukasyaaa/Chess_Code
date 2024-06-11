@@ -1,15 +1,15 @@
 import React, { FC } from "react";
-import { Colors } from "../modules/vars";
+import { ListType } from "../modules/vars";
 
 interface OptionsProps{
-    giveUp : (newValue : boolean) => void;
-    offerDraw : (newValue : boolean) => void;
+    gaveUp : () => void;
+    appearPickerWin : (type : ListType) => void;
     buttonsDisabled : boolean;
     whiteTimer : number;
     blackTimer : number;
 }
 
-export const Options : FC<OptionsProps> = ({giveUp, offerDraw, buttonsDisabled, whiteTimer, blackTimer}) =>{
+export const Options : FC<OptionsProps> = ({gaveUp, appearPickerWin, buttonsDisabled, whiteTimer, blackTimer}) =>{
 
     if(buttonsDisabled){
         return(
@@ -20,15 +20,15 @@ export const Options : FC<OptionsProps> = ({giveUp, offerDraw, buttonsDisabled, 
                 </div>
                 <div className="options__buttons">
                     <button 
+                        tabIndex={-1}
                         className="options__button options__draw" 
                         type="button" 
-                        onClick={() => offerDraw(true)}
                         disabled
                     >Offer a draw</button>
                     <button 
+                        tabIndex={-1}
                         className="options__button options__give-up" 
                         type="button" 
-                        onClick={() => giveUp(true)}
                         disabled
                     >Give up</button>
                 </div>
@@ -42,8 +42,18 @@ export const Options : FC<OptionsProps> = ({giveUp, offerDraw, buttonsDisabled, 
                 <span className="options__timer options__timer_black">Black: {blackTimer}</span>
             </div>
             <div className="options__buttons">
-                <button className="options__button options__draw" type="button" onClick={() => offerDraw(true)}>Offer a draw</button>
-                <button className="options__button options__give-up" type="button" onClick={() => giveUp(true)}>Give up</button>
+                <button 
+                    tabIndex={1}
+                    className="options__button options__draw" 
+                    type="button" 
+                    onClick={() => appearPickerWin(ListType.Consent)}
+                >Offer a draw</button>
+                <button 
+                    tabIndex={2}
+                    className="options__button options__give-up" 
+                    type="button" 
+                    onClick={gaveUp}
+                >Give up</button>
             </div>
         </div>
     )

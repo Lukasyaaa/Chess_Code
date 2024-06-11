@@ -1,6 +1,5 @@
 import Cell from "./Cell"
-import { Colors } from "./vars";
-import { FiguresType } from "./vars";
+import { move, coord, Colors, FiguresType } from "./vars";
 import { Figure } from "./figures/Figure";
 import { Pawn } from "./figures/Pawn"
 import { Rook } from "./figures/Rook"
@@ -13,24 +12,6 @@ enum Direction{
     Diagonal = -1,
     Horizontal = 0,
     Vertical = 1,
-}
-
-interface coord{
-    x: number,
-    y: number,
-}
-
-interface pseudoFigure{
-    type : FiguresType,
-    color : Colors
-}
-
-interface move{
-    figure      : pseudoFigure,
-    oldCoord    : coord,
-    newCoord    : coord,
-    isCheck     : boolean,
-    isCheckmate : boolean,
 }
 
 class Board{
@@ -367,13 +348,11 @@ class Board{
     private isKingUnderAttack(passivePlayer : Colors, currentPlayer : Colors) : void{
         //Ищем Короля
         let checkableKing : null | Cell = null; 
-        let findKing : boolean = false;
-        for(let y : number = 0; y < 8 && !findKing; y++){
+        for(let y : number = 0; y < 8 && checkableKing === null; y++){
             for(let x : number = 0; x < 8; x++){
                 if(this.cells[y][x].getFigure()?.getType() === FiguresType.King &&
                 this.cells[y][x].getFigure()?.getColor() === passivePlayer){
                     checkableKing = this.cells[y][x];
-                    findKing = true;                    
                     break;
                 }
             }
@@ -470,6 +449,7 @@ class Board{
         }
     }
     public moveFigure(oldCell : Cell, newCell : Cell) : void{
+        this.nullingAvailable();
         const figure = oldCell.getFigure();
         const eatedFigure : Figure | null = this.cells[newCell.getY()][newCell.getX()].getFigure();
         if(figure){
@@ -504,6 +484,7 @@ class Board{
                     this.blackEatedFigures.push(eatedFigure);
                 }
             }
+            
             this.isKingUnderAttack(figure.getColor(), Number(!Boolean(figure.getColor())))
             if(this.check === null){
                 this.isKingUnderAttack(Number(!Boolean(figure.getColor())), figure.getColor())
@@ -511,11 +492,11 @@ class Board{
                 this.checkmate = this.check;
             }
             this.history.push({
-                figure:      {type: figure.getType(), color: figure.getColor()},
+                figure:      {type: figure.getType(), color: figure.getColor(), src: figure.getSrc()},
                 oldCoord:    {x: oldCell.getX(), y: oldCell.getY()},
                 newCoord:    {x: newCell.getX(), y: newCell.getY()},
-                isCheck:     this.check !== null,
-                isCheckmate: this.checkmate !== null,
+                check:     this.check,
+                checkmate: this.checkmate,
             })
             this.currentPlayer = Number(!Boolean(this.currentPlayer));
         }

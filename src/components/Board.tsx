@@ -1,28 +1,32 @@
 import React, { FC, useState } from "react";
 import BoardClass from "../modules/Board";
-import { Colors, Consent } from "../modules/vars";
-import { FiguresType } from "../modules/vars";
-import { Direction } from "../modules/vars"
-import { CoordLine } from "./CoordLine";
-import { Cell } from "./Cell";
 import cellClass  from "../modules/Cell";
+import { Colors, Consent, ListType, Direction, FiguresType } from "../modules/vars";
 import { Queen } from "../modules/figures/Queen";
 import { Knight } from "../modules/figures/Knight";
 import { Rook } from "../modules/figures/Rook";
 import { Bishop } from "../modules/figures/Bishop";
+import { CoordLine } from "./CoordLine";
+import { Cell } from "./Cell";
 
 interface setter<T>{
     value : T;
-    set : (newValue : T) => void
+    set : (newValue : T) => void;
+}
+
+interface typePickerWinSetter{
+    value : ListType | null;
+    set : (newValue : ListType) => void;
 }
 
 interface BoardProps{
-    board : setter<BoardClass>
-    appearPicker : setter<boolean>
-    choosed : setter<FiguresType | Consent>
+    board : setter<BoardClass>,
+    typePickerWin : typePickerWinSetter,
+    choosed : setter<FiguresType | Consent>,
+    isCellsPassive : boolean;
 }
 
-export const Board : FC<BoardProps> = ({board, appearPicker, choosed}) =>{
+export const Board : FC<BoardProps> = ({board, typePickerWin, choosed, isCellsPassive}) =>{
     let [numberActiveCell, setNumberActiveCell] = useState<number>(-1)
 
     if(choosed.value !== FiguresType.Default && choosed.value !== Consent.Yes && choosed.value !== Consent.No){
@@ -88,9 +92,8 @@ export const Board : FC<BoardProps> = ({board, appearPicker, choosed}) =>{
                 }else if(clickedCell.isAvailable()){
                     setNumberActiveCell(-1);
                     board.value.moveFigure(activeCell, clickedCell);
-                    board.value.nullingAvailable();
                     if(activeCell.getFigure()?.getType() === FiguresType.Pawn && (!clickedCell.getY() || clickedCell.getY() === 7)){
-                        appearPicker.set(true);
+                        typePickerWin.set(ListType.Figure);
                     }
                 }else if(clickedCell.getFigure()?.getColor() === activeCell.getFigure()?.getColor()){
                     setNumberActiveCell(Number(clicked.getAttribute("data-id")));
@@ -111,6 +114,22 @@ export const Board : FC<BoardProps> = ({board, appearPicker, choosed}) =>{
         classes.push(`_${(!board.value.getCheck()) ? "black" : "white"}-check`)
     }
 
+    let tabIndeces : number[] = [];
+    let tabIter : number = 1 + Number(board.value.getHistory().length !== 0) * 2;
+    if(!isCellsPassive){
+        for(let y : number = 0; y < 8; y++){
+            for(let x : number = 0; x < 8; x++){
+                if(board.value.getCells()[y][x].getFigure()?.getColor() === board.value.getCurrentPlayer() ||
+                board.value.getCells()[y][x].isAvailable()){
+                    tabIndeces.push(tabIter++);
+                }else{
+                    tabIndeces.push(-1);
+                }
+            }
+        }
+        tabIter = 0;
+    }
+
     return(
         <main className={classes.join(" ")}>
             <h2 className="board__heading_turn">{`${(!board.value.getCurrentPlayer()) ? "Black" : "White"} turn`}</h2>
@@ -121,13 +140,14 @@ export const Board : FC<BoardProps> = ({board, appearPicker, choosed}) =>{
                 {board.value.getCells().map((row, rowIndex) => 
                     <React.Fragment key={rowIndex}>{row.map(cell => 
                         <Cell 
-                            tabIndex = {((appearPicker) ? -1 : cell.getY() * 8 + cell.getX())}
+                            tabIndex = {((isCellsPassive) ? -1 : tabIndeces[tabIter++])}
                             key = {cell.getY() * 8 + cell.getX()}
                             id = {cell.getY() * 8 + cell.getX()}
                             color = {cell.getColor()} 
                             figure = {cell.getFigure()}
                             isAvailable = {cell.isAvailable()}
                             isActive = {(numberActiveCell === cell.getY() * 8 + cell.getX())}
+                            isDisabled = {(isCellsPassive || tabIndeces[tabIter - 1] === -1)}
                         />
                     )}</React.Fragment>
                 )}

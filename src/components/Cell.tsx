@@ -1,7 +1,6 @@
 import React, { FC } from "react";
-import { Colors } from "../modules/vars";
+import { Colors, FiguresType } from "../modules/vars";
 import { Figure } from "../modules/figures/Figure";
-import { FiguresType } from "../modules/vars";
 
 interface CellProps{
     tabIndex : number,
@@ -10,9 +9,10 @@ interface CellProps{
     figure : Figure | null,
     isAvailable : boolean,
     isActive : boolean,
+    isDisabled : boolean,
 }
 
-export const Cell : FC<CellProps> = ({tabIndex, id, color, figure, isAvailable, isActive}) =>{
+export const Cell : FC<CellProps> = ({tabIndex, id, color, figure, isAvailable, isActive, isDisabled}) =>{
     let classes : string[] = ["game-board__link", ((!color) ? "black" : "white")];
     if(isActive){
         classes.push("_active");
@@ -26,6 +26,20 @@ export const Cell : FC<CellProps> = ({tabIndex, id, color, figure, isAvailable, 
         if(figure.getType() === FiguresType.King){
             classes.push(`_king-${(figure.getColor()) ? "white" : "black"}`);
         }
+    }
+    if(isDisabled){
+        return(
+            <li data-id={id} className={classes.join(" ")}>
+                <button 
+                    disabled
+                    tabIndex={tabIndex}
+                    type="button" 
+                    className="game-board__cell"
+                >
+                    {figure != null && <img src={figure.getSrc()} alt={figure.getType()}/>}
+                </button>
+            </li>
+        )
     }
     return(
         <li data-id={id} className={classes.join(" ")}>

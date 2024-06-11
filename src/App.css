@@ -32,6 +32,9 @@ ul{
     align-items: center;
 }
 .options__timer{
+    flex: 1 1 auto;
+    text-align: center;
+
     font-family: "REM", sans-serif;
     font-weight: 400;
     font-size: 22px;
@@ -45,10 +48,19 @@ ul{
     display: flex;
     flex-direction: column;
 }
+
+.options__button:focus{
+    outline: none;
+}
+.options__button:focus.options__button::after{
+    border-width: 5px;
+}
 .options__button{
+    position: relative;
+
     background-color: #6A4026;
     border: 0;
-    padding: 10px 10px;
+    padding: 10px 62px;
 
     font-family: "REM", sans-serif;
     font-weight: 400;
@@ -56,6 +68,23 @@ ul{
     color: #fff;
 
     cursor: pointer;
+}
+.options__button::after{
+    content: "";
+
+    border-width: 0;
+    border-style: solid;
+    border-color: #2c1a10;
+    background-color: transparent;
+
+    width: 100%;
+    height: 100%;
+
+    position: absolute;
+    left: 0;
+    top: 0;
+
+    transition: border-width 0.3s linear;
 }
 .options._not-active .options__button{
     cursor: default;
@@ -121,10 +150,7 @@ ul{
     grid-template-rows: repeat(8, 64px);
 }
 
-.board._white-turn .game-board__link._available button,
-.board._white-turn .game-board__link._figure-white button,
-.board._black-turn .game-board__link._available button,
-.board._black-turn .game-board__link._figure-black button{
+.game-board__link button:not([disabled]){
     cursor: pointer;
 }
 .game-board__link button{
@@ -136,11 +162,15 @@ ul{
     height: 100%;
     width: 100%;
 
-    transition: border-color 0.3s linear;
+    transition: border-color 0.3s linear,
+    box-shadow 0.3s linear;
 }
 .game-board__link.black button{
     border: 5px solid #6A4026;
     background-color: #6A4026;
+}
+.game-board__link button:focus{
+    outline: none;
 }
 .game-board__link.white button{
     border: 5px solid #F6DBB4;
@@ -158,6 +188,8 @@ ul{
 
     width: 12px;
     height: 12px;
+
+    transition: filter 0.3s linear;
 }
 .board._white-turn .game-board__link:not(._has-figure)._available button::after{
     background-color: #fff;
@@ -171,6 +203,15 @@ ul{
 .board._white-turn .game-board__link._has-figure._available button{
     border: 5px solid #fff;
 }
+
+.game-board__link._has-figure button:focus img,
+.game-board__link._active img{
+    filter: drop-shadow(0 0 5px #000);
+}
+.game-board__link:not(._has-figure) button:focus::after{
+    filter: drop-shadow(0 0 5px #000);
+}
+
 
 .board._black-check .game-board__link._king-black img,
 .board._white-check .game-board__link._king-white img{
@@ -186,6 +227,8 @@ ul{
     top: 50%;
 
     transform: translate(-50%, -50%);
+
+    transition: filter 0.3s linear;
 }
 
 .eated-figures{
@@ -255,19 +298,48 @@ ul{
     color: #000;
 }
 
-.choose__list{
+.modal-win{
+    padding: 50px;
+
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.9);
+
+    position: absolute;
+    z-index: 3;
+    left: 0;
+    top: 0;
+
     display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+
+    width: 100%;
+    min-height: 100%;
+}
+
+.modal-win__heading{
+    font-family: "REM", sans-serif;
+    font-weight: 400;
+    color: #fff;
+    font-size: 40px;
+
+    margin-bottom: 10px;
+}
+
+.modal-win__list{
+    display: inline-flex;
     flex-direction: column;
 }
 
-.choose__link{
+.modal-win__link{
     position: relative;
 }
 
-.choose__link button:focus{
+.modal-win__link button:focus{
     outline: none;
 }
-.choose__link button{
+.modal-win__link button{
     font-family: "REM", sans-serif;
     font-weight: 400;
     color: #fff;
@@ -290,7 +362,7 @@ ul{
     padding: 20px 50px;
 }
 
-.choose__link::after{
+.modal-win__link::after{
     content: "";
     border-width: 0;
     border-color: #fff;
@@ -310,45 +382,19 @@ ul{
     height 0.3s linear,
     border-width 0.3s linear;
 }
-.choose__link._active::after,
-.choose__link button:focus + .choose__link::after{
+.modal-win__link._active::after,
+.modal-win__link button:focus + .modal-win__link::after{
     border-width: 5px;
     width: 100%;
     height: 100%;
 }
 
-.choose__link img{
+.modal-win img{
     width: 64px;
     height: 64px;
 }
 
-.lose-window, .choose{
-    background-color: rgba(0, 0, 0, 0.9);
-
-    position: absolute;
-    z-index: 3;
-    left: 0;
-    top: 0;
-
-    width: 100%;
-    height: 100%;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.lose-window__heading, .choose__heading{
-    font-family: "REM", sans-serif;
-    font-weight: 400;
-    color: #fff;
-    font-size: 40px;
-
-    margin-bottom: 10px;
-}
-
-.lose-window__restart{
+.modal-win__button{
     cursor: pointer;
 
     font-family: "REM", sans-serif;
@@ -361,4 +407,104 @@ ul{
     border-radius: 7px;
     background-color: #fff;
     box-shadow: 0 0 5px #fff;
+}
+.modal-win__button:first-child{
+    margin-right: 15px;
+}
+
+.moves__items{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+
+}
+.item-moves{
+    justify-self: center;
+    align-items: center;
+
+    display: grid;
+    grid-template-rows: auto 1fr;
+}
+
+.item-moves__number{
+    font-family: "REM", sans-serif;
+    font-weight: 400;
+    color: #fff;
+    font-size: 30px;
+}
+
+.item-moves__parts{
+    display: flex;
+    justify-content: center;
+    column-gap: 10px;
+}
+
+.item-moves__part{
+    border: 5px solid #000;
+    display: grid;
+    grid-template-columns: repeat(8, 32px);
+    grid-template-rows: repeat(8, 32px);
+}
+
+.item-moves__link{
+    position: relative;
+    background-color: #F6DBB4;
+}
+.item-moves__link._black{
+    background-color: #6a4026;
+}
+
+.item-moves__link._new-position img{
+    filter: drop-shadow(0 0 3px #000);
+}
+.item-moves__link._old-position img{
+    opacity: 0.5;
+}
+.item-moves__link img{
+    position: absolute;
+    left: 50%;
+    top: 50%;
+
+    width: 85%;
+    height: 85%;
+
+    transform: translate(-50%, -50%);
+}
+.item-moves__part._white-in-dangerous .item-moves__link._white-king img,
+.item-moves__part._black-in-dangerous .item-moves__link._black-king img{
+    filter: drop-shadow(0 0 3px #990000);
+}
+
+.moves__close{
+    border-radius: 50%;
+    border: 0;
+    background-color: #fff;
+
+    position: fixed;
+    right: 15px;
+    bottom: 15px;
+
+    width: 40px;
+    height: 40px;
+
+    cursor: pointer;
+}
+
+.moves__close::after,
+.moves__close::before{
+    background-color: #000;
+    content: "";
+
+    position: absolute;
+    left: 50%;
+    top: 50%;
+
+    width: 3px;
+    height: 25px;
+}
+.moves__close::after{
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+.moves__close::before{
+    transform: translate(-50%, -50%) rotate(-45deg);
 }

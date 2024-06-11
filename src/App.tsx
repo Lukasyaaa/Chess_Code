@@ -1,102 +1,139 @@
 import React, { FC, useEffect, useState, useRef } from "react";
-import BoardClass from "./modules/Board";
-import { Consent, ListType } from "./modules/vars";
-import { FiguresType } from "./modules/vars";
-import { Board } from "./components/Board";
-import { LoseWindow } from "./components/LoseWindow";
-import { PickerWindow } from "./components/PickerWindow";
 import "./App.css";
 import { EatedFigures } from "./components/EatedFigures";
 import { Options } from "./components/Options";
+import { MovesHistoryWindow } from "./components/MovesHistoryWindow";
+import { LoseWindow } from "./components/LoseWindow";
+import PickerWindow from "./components/PickerWindow";
+import { Board } from "./components/Board";
+import BoardClass from "./modules/Board";
+import { Consent, ListType, FiguresType, list } from "./modules/vars";
 
-interface htmlTag{
-    content : string;
-    value : Consent | FiguresType;
-}
+export const App : FC = () => {
 
-interface list{
-    type : ListType,
-    items : htmlTag[]
-}
-
-export const App : FC = () =>{
+    let [board, setBoard] = useState<BoardClass>(new BoardClass());
     let [whiteTimer, setWhiteTimer] = useState<number>(300);
     let [blackTimer, setBlackTimer] = useState<number>(300);
 
-    let [choosed, setChoosed] = useState<FiguresType | Consent>(FiguresType.Default);
+    let [isGaveUp, setIsGaveUp] = useState<boolean>(false);
+    let [isNeedMovesHistory, setIsNeedMoveHistory] = useState<boolean>(false);
+    let [typePickerWin, setTypePickerWin] = useState<null | ListType>(null);
+    let [picked, setPicked] = useState<FiguresType | Consent>(FiguresType.Default);
 
-    let [isNeedNewShape, setIsNeedNewShape] = useState<boolean>(false);
-    let [isDraw, setIsDraw] = useState<boolean>(false);
-
-    let [isGameOver, setIsGameOver] = useState<boolean>(false);
-
-    let [board, setBoard] = useState<BoardClass>(new BoardClass());
-
-    const restart = () => {
-        const board : BoardClass = new BoardClass();
-        setBoard(board);
-        setIsGameOver(false);
-        setWhiteTimer(300);
-        setBlackTimer(300);
-    }
-
-    if(choosed === Consent.Yes){
-        restart();
-        setChoosed(FiguresType.Default);
-    }
-
+    let chooseList = useRef<HTMLUListElement>(null);
     useEffect(() =>{
         window.addEventListener("keydown", (e : KeyboardEvent) =>{
-            if(e.code === "ArrowUp" || e.code === "KeyW" || e.code === "ArrowDown" || e.code === "KeyS" 
-            || e.code === "Enter" || e.code === "Tab"){
-                if(isNeedNewShape || isDraw){
-                    const ourList : any = document.querySelector(".choose__list");
-                    if(ourList){
-                        for(let link of ourList.childNodes){
-                            if(link.classList.contains("_active")){
-                                if(e.code === "ArrowDown" || e.code === "KeyS" || e.code === "Tab"){
-                                    ourList.childNodes[(Number(link.getAttribute("data-id")) + 1) % ourList.childNodes.length].classList.add("_active");
-                                    ourList.childNodes[(Number(link.getAttribute("data-id")) + 1) % ourList.childNodes.length].childNodes[0].focus();
-                                }else if(e.code === "ArrowUp" || e.code === "KeyW"){
-                                    ourList.childNodes[(Number(link.getAttribute("data-id")) - 1 + ourList.childNodes.length) % ourList.childNodes.length].classList.add("_active");
-                                    ourList.childNodes[(Number(link.getAttribute("data-id")) - 1 + ourList.childNodes.length) % ourList.childNodes.length].childNodes[0].focus();
-                                }else{
-                                    debugger;
-                                    setChoosed(link.getAttribute("data-value"));
-                                    if(isDraw){
-                                        setIsDraw(false);
-                                    }else{
-                                        setIsNeedNewShape(false);
-                                    }
-                                }
-                                link.childNodes[0].blur();
-                                link.classList.remove("_active");
-                                break;
+            if(chooseList.current && typePickerWin !== null){
+                const ourList : any = chooseList.current;
+                let pressedNumber : number = 0;
+                //Проверка на то являеться ли нажатой Клавишей - Цифра
+                for(let number : number = 1; number != ourList.childNodes.length + 1; number++){
+                    /*Операция: [e.code.length - 1] - Даст мне Последний символ нажатой Клавиши
+                    P.S. Код клавиши с Цифрой:(KeyЦифра) и при помощи операции выше - я получу Цифру(Если была нажата Клавиша с Цифрой)*/
+                    if(Number(e.code[e.code.length - 1]) === number){
+                        pressedNumber = number;
+                        break;
+                    }
+                }
+                if(pressedNumber || e.code === "ArrowUp" || e.code === "KeyW" || e.code === "ArrowDown" || e.code === "KeyS" 
+                || e.code === "Enter" || e.code === "Tab"){
+                    for(let link of ourList.childNodes){
+                        if(link.classList.contains("_active")){
+                            if(pressedNumber){
+                                ourList.childNodes[pressedNumber - 1].classList.add("_active");
+                                ourList.childNodes[pressedNumber - 1].childNodes[0].focus();
                             }
+                            else if(e.code === "ArrowDown" || e.code === "KeyS" || e.code === "Tab"){
+                                let numberNextLink : number = Number(link.getAttribute("data-id")) + 1;
+                                ourList.childNodes[numberNextLink % ourList.childNodes.length].classList.add("_active");
+                                ourList.childNodes[numberNextLink % ourList.childNodes.length].childNodes[0].focus();
+                            }else if(e.code === "ArrowUp" || e.code === "KeyW"){
+                                let numberPrevLink : number = Number(link.getAttribute("data-id")) - 1;
+                                ourList.childNodes[(numberPrevLink + ourList.childNodes.length) % ourList.childNodes.length].classList.add("_active");
+                                ourList.childNodes[(numberPrevLink + ourList.childNodes.length) % ourList.childNodes.length].childNodes[0].focus();
+                            }else{
+                                setPicked(link.getAttribute("data-value"));
+                                setTypePickerWin(null);
+                            }
+                            link.childNodes[0].blur();
+                            link.classList.remove("_active");
+                            break;
                         }
                     }
                 }
             }
         })
-    }, [isNeedNewShape, isDraw])
+    }, [typePickerWin])
 
     const timer = useRef<null | ReturnType<typeof setInterval>>(null);
-
     const decrementWhite = () =>{
-        setWhiteTimer(prev => Math.max(prev - 1, 0));
+        setWhiteTimer(prev => prev - 1);
     }
-
     const decrementBlack = () =>{
-        setBlackTimer(prev => Math.max(prev - 1, 0));
+        setBlackTimer(prev => prev - 1);
     }
-    
-    useEffect(() =>{
+    const decrementTimer = () =>{
         if(timer.current){
             clearInterval(timer.current);
         }
         const callback = ((!board.getCurrentPlayer()) ? decrementBlack : decrementWhite);
         timer.current = setInterval(callback, 1000);
+    }
+
+    useEffect(() =>{
+        decrementTimer();
     }, [board.getCurrentPlayer()]);
+
+    if(!whiteTimer || !blackTimer || board.getCheckmate() !== null){
+        if(timer.current){
+            clearInterval(timer.current);
+        }
+    }
+
+    const restart = () => {
+        setIsGaveUp(false);
+
+        const board : BoardClass = new BoardClass();
+        setBoard(board);
+        setWhiteTimer(300);
+        setBlackTimer(300);
+        decrementTimer();
+    }
+
+    if(picked === Consent.Yes){
+        restart();
+        setPicked(FiguresType.Default);
+    }
+
+    const appearPickerWin = (type : ListType) =>{
+        setTypePickerWin(type);
+        if(timer.current){
+            clearInterval(timer.current);
+        }
+    }
+    const disappearPickerWin = () =>{
+        setTypePickerWin(null);
+        const callback = ((!board.getCurrentPlayer()) ? decrementBlack : decrementWhite);
+        timer.current = setInterval(callback, 1000);
+    }
+
+    const gaveUp = () =>{
+        setIsGaveUp(true);
+        if(timer.current){
+            clearInterval(timer.current);
+        }
+    }
+
+    const appearMoveHistory = () =>{
+        setIsGaveUp(false);
+        setIsNeedMoveHistory(true);
+    }
+    const disappearMoveHistory = () =>{
+        if(board.getCheckmate() === null && whiteTimer && blackTimer){
+            setIsGaveUp(true);
+        }
+        setIsNeedMoveHistory(false);
+    }
 
     const figuresList : list = {
         type: ListType.Figure,
@@ -118,45 +155,56 @@ export const App : FC = () =>{
     return(
         <React.Fragment>
             <Options 
-                giveUp={setIsGameOver} 
-                offerDraw={setIsDraw} 
-                buttonsDisabled={board.getHistory().length == 0}
+                gaveUp={gaveUp} 
+                appearPickerWin={appearPickerWin} 
+                buttonsDisabled={board.getHistory().length === 0 || typePickerWin !== null || isGaveUp || isNeedMovesHistory}
                 whiteTimer={whiteTimer}
                 blackTimer={blackTimer} 
             />
             <Board 
                 board = {{value: board, set: setBoard}} 
-                appearPicker={{value : isNeedNewShape, set: setIsNeedNewShape}} 
-                choosed={{value : choosed, set: setChoosed}}
+                typePickerWin={{value : typePickerWin, set: appearPickerWin}} 
+                choosed={{value : picked, set: setPicked}}
+                isCellsPassive={typePickerWin !== null || isGaveUp || isNeedMovesHistory}
             />
             <EatedFigures eatedBlack = {board.getBlackEatedFigures()} eatedWhite = {board.getWhiteEatedFigures()} />
-            {board.getCheckmate() !== null && <LoseWindow 
+            {board.getCheckmate() !== null && !isNeedMovesHistory && <LoseWindow 
                 heading={(!board.getCheckmate()) ? "Black Checkmate" : "White Checkmate"}
                 restart={restart}
+                appearMoveHistory={appearMoveHistory}
             />}
-            {isGameOver && <LoseWindow 
+            {isGaveUp && <LoseWindow 
                 heading={`${(!board.getCurrentPlayer()) ? "Black" : "White"} gave up`} 
                 restart={restart}
+                appearMoveHistory={appearMoveHistory}
             />}
-            {!whiteTimer && <LoseWindow 
+            {!whiteTimer && !isNeedMovesHistory && <LoseWindow 
                 heading="White out of Time"
-                restart={restart}            
+                restart={restart}  
+                appearMoveHistory={(board.getHistory().length) ? appearMoveHistory : null}
             />}
-            {!blackTimer && <LoseWindow 
+            {!blackTimer && !isNeedMovesHistory && <LoseWindow 
                 heading="Black out of Time"
-                restart={restart}            
+                restart={restart}   
+                appearMoveHistory={(board.getHistory().length) ? appearMoveHistory : null}         
             />}
-            {isNeedNewShape && <PickerWindow 
+            {typePickerWin === ListType.Figure && <PickerWindow 
+                ref={chooseList}
                 heading = "Choose new Shape"
                 list = {figuresList}
-                setChoose = {setChoosed} 
-                setWindowState = {setIsNeedNewShape} 
+                setChoose = {setPicked} 
+                disappearPickerWin = {disappearPickerWin} 
             />}
-            {isDraw && <PickerWindow 
+            {typePickerWin === ListType.Consent && <PickerWindow 
+                ref={chooseList}
                 heading = "Are you agreeable to a Draw"
                 list = {drawList}
-                setChoose = {setChoosed} 
-                setWindowState = {setIsDraw} 
+                setChoose = {setPicked} 
+                disappearPickerWin = {disappearPickerWin} 
+            />}
+            {isNeedMovesHistory && <MovesHistoryWindow 
+                history={board.getHistory()}
+                close={disappearMoveHistory}
             />}
         </React.Fragment>
     )
