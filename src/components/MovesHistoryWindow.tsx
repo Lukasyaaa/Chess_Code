@@ -15,15 +15,15 @@ import blackKing from "../img/black-king.png"
 
 interface MovesHistoryWindowProps{
     history : move[],
-    close : () => void,
+    setIsNeedMoveHistory : (newValue : boolean) => void,
 }
 
-export const MovesHistoryWindow : FC<MovesHistoryWindowProps> = ({close, history}) => {
+export const MovesHistoryWindow : FC<MovesHistoryWindowProps> = ({setIsNeedMoveHistory, history}) => {
     const initPseudoBoard = () : pseudoBoard =>{
         let board : pseudoBoard = {cells: []}
-        for(let y : number = 0; y < 8; y++){
+        for(let y : number = 0; y !== 8; y++){
             let row : pseudoCell[] = [];
-            for(let x : number = 0; x < 8; x++){
+            for(let x : number = 0; x !== 8; x++){
                 let figure : pseudoFigure | null = null;
                 switch(y){
                     case 0:
@@ -89,14 +89,25 @@ export const MovesHistoryWindow : FC<MovesHistoryWindowProps> = ({close, history
 
     const getCopyPseudoBoard = (board : pseudoBoard) : pseudoBoard =>{
         let newBoard : pseudoBoard = {cells: []};
-        for(let y = 0; y < 8; y++){
+        for(let y = 0; y !== 8; y++){
             let row : pseudoCell[] = [];
-            for(let x = 0; x < 8; x++){
+            for(let x = 0; x !== 8; x++){
                 row.push({x: x, y: y, color: board.cells[y][x].color, figure: board.cells[y][x].figure});
             }
             newBoard.cells.push(row)
         }
         return newBoard;
+    }
+
+    const correctHistory : move[][] = [];
+    for(let i : number = 0; i < history.length; i++){
+        let row : move[] = [];
+        row.push(history[i]);
+        if(i + 1 < history.length){
+            row.push(history[i+1]);
+            i++;
+        }
+        correctHistory.push(row);
     }
 
     const isCastling = (figure : pseudoFigure, newCoordX : number, oldCoordX : number) : boolean =>{
@@ -129,40 +140,34 @@ export const MovesHistoryWindow : FC<MovesHistoryWindowProps> = ({close, history
     }
     let boardesIter : number = 0;
 
-    const correctHistory : move[][] = [];
-    for(let i : number = 0; i < history.length; i++){
-        let row : move[] = [];
-        row.push(history[i]);
-        if(i + 1 < history.length){
-            row.push(history[i+1]);
-            i++;
-        }
-        correctHistory.push(row);
+    const hereWasCastlingRook = (cell : pseudoCell, history : move) : boolean =>{
+        return (history.figure.type === FiguresType.King && 
+            (!cell.x || cell.x === 7) && 
+            ((!cell.y && history.figure.color === Colors.Black) || (cell.y === 7 && history.figure.color === Colors.White )) &&
+            isCastling(history.figure, history.newCoord.x, history.oldCoord.x))
+    }
+    const hereCastlingRook = (cell : pseudoCell, history : move) : boolean =>{
+        return(history.figure.type === FiguresType.King && cell.figure?.type === FiguresType.Rook && 
+            history.figure.color === cell.figure.color && 
+            (cell.x + 1 === history.newCoord.x || cell.x - 1 === history.newCoord.x));
+    }
+
+    const isOldPosition = (cell : pseudoCell, history : move) : boolean =>{
+        return (cell.x === history.oldCoord.x && cell.y === history.oldCoord.y);
+    }
+    const isNewPosition = (cell : pseudoCell, history : move) : boolean =>{
+        return (cell.x === history.newCoord.x && cell.y === history.newCoord.y);
+    }
+
+    const isClassNewPosition = (cell : pseudoCell, history : move) : string =>{
+        return (isNewPosition(cell, history) || hereCastlingRook(cell, history)) ? " _new-position" : ""; 
+    }
+    const isClassOldPosition = (cell : pseudoCell, history : move) : string =>{
+        return (isOldPosition(cell, history) || hereWasCastlingRook(cell, history)) ? " _old-position" : ""; 
     }
 
     const isKing = (figure : pseudoFigure | null) : string =>{
         return (figure?.type === FiguresType.King) ? ` _${(!figure.color) ? "black" : "white"}-king` : "";
-    }
-
-    const hereWasCastlingRook = (cell : pseudoCell, history : move) : string =>{
-        return (history.figure.type === FiguresType.King && 
-            (!cell.x || cell.x === 7) && 
-            ((!cell.y && history.figure.color === Colors.Black) || (cell.y === 7 && history.figure.color === Colors.White )) &&
-            isCastling(history.figure, history.newCoord.x, history.oldCoord.x)) ? " _old-position" : "";
-    }
-
-    const hereCastlingRook = (cell : pseudoCell, history : move) : string =>{
-        return((history.figure.type === FiguresType.King && cell.figure?.type === FiguresType.Rook && 
-            history.figure.color === cell.figure.color && 
-            (cell.x + 1 === history.newCoord.x || cell.x - 1 === history.newCoord.x)) ? " _new-position" : "")
-    }
-
-    const isOldPosition = (oldCoord : coord, cellCoord : coord) : string =>{
-        return (cellCoord.x === oldCoord.x && cellCoord.y === oldCoord.y) ? " _old-position" : "";
-    }
-
-    const isNewPosition = (newCoord : coord, cellCoord : coord) : string =>{
-        return (cellCoord.x === newCoord.x && cellCoord.y === newCoord.y) ? " _new-position" : "";
     }
 
     const isInDangerous = (check : Colors | null, checkmate : Colors | null) : string =>{
@@ -180,37 +185,53 @@ export const MovesHistoryWindow : FC<MovesHistoryWindowProps> = ({close, history
             <h2 className="moves__heading modal-win__heading">History Moves</h2>
             <div className="moves__items">
                 {correctHistory.map((move, moveNumber) => <div key={moveNumber} className="moves__item item-moves">
-                    <h3 className="item-moves__number">{moveNumber + 1}</h3>
-                    <div className="item-moves__parts">
-                        <ul key={Number(moveNumber !== 0) * 2 * moveNumber + 1} className={`item-moves__part item-modal-win__part${isInDangerous(move[0].check, move[0].checkmate)}`}>
+                    <h3 key={moveNumber} className="item-moves__number">{moveNumber + 1}</h3>
+                    <div key={moveNumber} className="item-moves__parts">
+                        <ul 
+                            key={Number(moveNumber !== 0) * 2 * moveNumber + 1} 
+                            className={`item-moves__part item-modal-win__part${isInDangerous(move[0].check, move[0].checkmate)}`}
+                        >
                             {boardes[boardesIter++].cells.map((row, rowNumber) => <React.Fragment key={rowNumber}>
                                 {row.map((cell) => <li 
                                     key={cell.y * 8 + cell.x}
-                                    className={`item-moves__link _${(!cell.color) ? "black" : "white"}${isOldPosition(move[0].oldCoord, {x: cell.x, y: cell.y})}${isNewPosition(move[0].newCoord, {x: cell.x, y: cell.y})}${isKing(cell.figure)}${hereWasCastlingRook(cell, move[0])}${hereCastlingRook(cell, move[0])}`}>
+                                    className={`item-moves__link _${(!cell.color) ? "black" : "white"}${isClassOldPosition(cell, move[0])}${isClassNewPosition(cell, move[0])}${isKing(cell.figure)}`}
+                                    >
                                     {cell.figure && <img src={cell.figure?.src} alt={cell.figure?.type}/>}
-                                    {((Boolean(isNewPosition(move[0].newCoord, {x: cell.x, y: cell.y})) || Boolean(isOldPosition(move[0].oldCoord, {x: cell.x, y: cell.y}))) && <img src={move[0].figure.src} alt={move[0].figure.type}/>)}
-                                    {Boolean(hereWasCastlingRook(cell, move[0])) && 
-                                        <img src={(!move[0].figure.color) ? blackRook : whiteRook} alt={FiguresType.Rook} />}
+                                    {
+                                        ((isNewPosition(cell, move[0]) || isOldPosition(cell, move[0])) && 
+                                        <img src={move[0].figure.src} alt={move[0].figure.type}/>)
+                                    }
+                                    {hereWasCastlingRook(cell, move[0]) && 
+                                        <img src={(!move[0].figure.color) ? blackRook : whiteRook} alt={FiguresType.Rook} />
+                                    }
                                 </li>)}
                             </React.Fragment>)}
                         </ul>
                         {move.length == 2 &&                     
-                        <ul key={Number(moveNumber !== 0) * 2 * moveNumber + 2} className={`item-moves__part item-modal-win__part${isInDangerous(move[1].check, move[1].checkmate)}`}>
+                        <ul 
+                            key={Number(moveNumber !== 0) * 2 * moveNumber + 2} 
+                            className={`item-moves__part item-modal-win__part${isInDangerous(move[1].check, move[1].checkmate)}`}
+                        >
                             {boardes[boardesIter++].cells.map((row, rowNumber) => <React.Fragment key={rowNumber}>
                                 {row.map((cell) => <li 
                                     key={cell.y * 8 + cell.x}
-                                    className={`item-moves__link _${(!cell.color) ? "black" : "white"}${isOldPosition(move[1].oldCoord, {x: cell.x, y: cell.y})}${isNewPosition(move[1].newCoord, {x: cell.x, y: cell.y})}${isKing(cell.figure)}${hereWasCastlingRook(cell, move[1])}${hereCastlingRook(cell, move[1])}`}>
+                                    className={`item-moves__link _${(!cell.color) ? "black" : "white"}${isClassOldPosition(cell, move[1])}${isClassNewPosition(cell, move[1])}${isKing(cell.figure)}`}
+                                    >
                                     {cell.figure && <img src={cell.figure?.src} alt={cell.figure?.type}/>}
-                                    {((Boolean(isNewPosition(move[1].newCoord, {x: cell.x, y: cell.y})) || Boolean(isOldPosition(move[1].oldCoord, {x: cell.x, y: cell.y}))) && <img src={move[1].figure.src} alt={move[1].figure.type}/>)}
-                                    {Boolean(hereWasCastlingRook(cell, move[1])) && 
-                                        <img src={(!move[1].figure.color) ? blackRook : whiteRook} alt={FiguresType.Rook} />}
+                                    {
+                                        ((isNewPosition(cell, move[1]) || isOldPosition(cell, move[1])) && 
+                                        <img src={move[1].figure.src} alt={move[1].figure.type}/>)
+                                    }
+                                    {hereWasCastlingRook(cell, move[1]) && 
+                                        <img src={(!move[1].figure.color) ? blackRook : whiteRook} alt={FiguresType.Rook} />
+                                    }
                                 </li>)}
                             </React.Fragment>)}
                         </ul>}
                     </div>
                 </div>)}
             </div>
-            <button className="moves__close modal-win__close" type="button" onClick={close}></button>
+            <button className="moves__close modal-win__close" type="button" onClick={() => setIsNeedMoveHistory(false)}></button>
         </div>
     )
 }

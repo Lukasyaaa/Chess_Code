@@ -1,13 +1,13 @@
 import React, { FC, useState } from "react";
+import { CoordLine } from "./CoordLine";
+import { Cell } from "./Cell";
 import BoardClass from "../modules/Board";
 import cellClass  from "../modules/Cell";
-import { Colors, Consent, ListType, Direction, FiguresType } from "../modules/vars";
+import { Colors, Consent, ListType, Direction, FiguresType, coord } from "../modules/vars";
 import { Queen } from "../modules/figures/Queen";
 import { Knight } from "../modules/figures/Knight";
 import { Rook } from "../modules/figures/Rook";
 import { Bishop } from "../modules/figures/Bishop";
-import { CoordLine } from "./CoordLine";
-import { Cell } from "./Cell";
 
 interface setter<T>{
     value : T;
@@ -30,31 +30,21 @@ export const Board : FC<BoardProps> = ({board, typePickerWin, choosed, isCellsPa
     let [numberActiveCell, setNumberActiveCell] = useState<number>(-1)
 
     if(choosed.value !== FiguresType.Default && choosed.value !== Consent.Yes && choosed.value !== Consent.No){
+        const pawnCoord : coord = board.value.getHistory()[board.value.getHistory().length - 1].newCoord; 
         const prevPlayer : Colors = Number(!Boolean(board.value.getCurrentPlayer()));
-        let leaveCycle : boolean = false;
-        for(let y : number = 0; !leaveCycle && y < 8; y+=7){
-            for(let x : number = 0; x < 8; x++){
-                if(board.value.getCells()[y][x].getFigure()?.getColor() === prevPlayer &&
-                board.value.getCells()[y][x].getFigure()?.getType() === FiguresType.Pawn){
-                    console.log(choosed.value);
-                    switch(choosed.value){
-                        case FiguresType.Queen:
-                            board.value.getCells()[y][x].setFigure(new Queen(prevPlayer));
-                            break;
-                        case FiguresType.Knight:
-                            board.value.getCells()[y][x].setFigure(new Knight(prevPlayer));
-                            break;
-                        case FiguresType.Rook:
-                            board.value.getCells()[y][x].setFigure(new Rook(prevPlayer));
-                            break;
-                        default:
-                            board.value.getCells()[y][x].setFigure(new Bishop(prevPlayer));
-                            break;
-                    }
-                    leaveCycle = true;
-                    break;
-                }
-            }
+        switch(choosed.value){
+            case FiguresType.Queen:
+                board.value.getCells()[pawnCoord.y][pawnCoord.x].setFigure(new Queen(prevPlayer));
+                break;
+            case FiguresType.Knight:
+                board.value.getCells()[pawnCoord.y][pawnCoord.x].setFigure(new Knight(prevPlayer));
+                break;
+            case FiguresType.Rook:
+                board.value.getCells()[pawnCoord.y][pawnCoord.x].setFigure(new Rook(prevPlayer));
+                break;
+            default:
+                board.value.getCells()[pawnCoord.y][pawnCoord.x].setFigure(new Bishop(prevPlayer));
+                break;
         }
         choosed.set(FiguresType.Default);
     }
@@ -70,23 +60,19 @@ export const Board : FC<BoardProps> = ({board, typePickerWin, choosed, isCellsPa
             while(!clicked.hasAttribute("data-id")){
                 clicked = clicked.parentNode;
             }
-            let clickedCell : cellClass = board.value.getCells()
-                [Math.floor(clicked.getAttribute("data-id") / 8)][clicked.getAttribute("data-id") % 8].getCopyCell();
-
+            const clickedCellId : number = Number(clicked.getAttribute("data-id"));
+            let clickedCell : cellClass = board.value.getCells()[Math.floor(clickedCellId / 8)][clickedCellId % 8].getCopyCell();
             //Если Нету Активной Ячейки
             if(numberActiveCell === -1){
-                if(clickedCell.getFigure()?.getColor() === board.value.getCurrentPlayer()){
-                    setNumberActiveCell(Number(clicked.getAttribute("data-id")));
-                    board.value.answerIsAvailable(clickedCell, false, true, true);
-                    changeBoard();
-                }
+                setNumberActiveCell(clickedCellId);
+                board.value.answerIsAvailable(clickedCell, false, true, true);
+                changeBoard();
             }else{
-                let activeCell : cellClass = board.value.getCells()
-                    [Math.floor(numberActiveCell / 8)][numberActiveCell % 8].getCopyCell();
+                let activeCell : cellClass = board.value.getCells()[Math.floor(numberActiveCell / 8)][numberActiveCell % 8].getCopyCell();
                 /*Если Нажали на Активную Ячейку
                 ИНАЧЕ Если Нажали на Доступную для Хода Ячейку
                 ИНАЧЕ Если Нажали на Ячейку с Фигурой такого же Цвета*/
-                if(numberActiveCell == clicked.getAttribute("data-id")){
+                if(numberActiveCell === clickedCellId){
                     setNumberActiveCell(-1);
                     board.value.nullingAvailable();
                 }else if(clickedCell.isAvailable()){
@@ -96,7 +82,7 @@ export const Board : FC<BoardProps> = ({board, typePickerWin, choosed, isCellsPa
                         typePickerWin.set(ListType.Figure);
                     }
                 }else if(clickedCell.getFigure()?.getColor() === activeCell.getFigure()?.getColor()){
-                    setNumberActiveCell(Number(clicked.getAttribute("data-id")));
+                    setNumberActiveCell(clickedCellId);
                     board.value.nullingAvailable();
                     board.value.answerIsAvailable(clickedCell, false, true, true);
                 }
@@ -117,8 +103,8 @@ export const Board : FC<BoardProps> = ({board, typePickerWin, choosed, isCellsPa
     let tabIndeces : number[] = [];
     let tabIter : number = 1 + Number(board.value.getHistory().length !== 0) * 2;
     if(!isCellsPassive){
-        for(let y : number = 0; y < 8; y++){
-            for(let x : number = 0; x < 8; x++){
+        for(let y : number = 0; y !== 8; y++){
+            for(let x : number = 0; x !== 8; x++){
                 if(board.value.getCells()[y][x].getFigure()?.getColor() === board.value.getCurrentPlayer() ||
                 board.value.getCells()[y][x].isAvailable()){
                     tabIndeces.push(tabIter++);

@@ -1,7 +1,6 @@
 import blackLogo from "../../img/black-knight.png"
 import whiteLogo from "../../img/white-knight.png"
-import { Colors } from "../vars"
-import { FiguresType } from "../vars"
+import { Colors, FiguresType } from "../vars"
 import { Figure } from "./Figure"
 
 export class Knight extends Figure{

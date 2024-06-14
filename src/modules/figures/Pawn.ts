@@ -1,7 +1,6 @@
 import blackLogo from "../../img/black-pawn.png"
 import whiteLogo from "../../img/white-pawn.png"
-import { Colors } from "../vars"
-import { FiguresType } from "../vars"
+import { Colors, FiguresType } from "../vars"
 import { Figure } from "./Figure"
 
 export class Pawn extends Figure{

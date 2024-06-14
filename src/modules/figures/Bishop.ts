@@ -1,7 +1,6 @@
 import blackLogo from "../../img/black-bishop.png"
 import whiteLogo from "../../img/white-bishop.png"
-import { Colors } from "../vars"
-import { FiguresType } from "../vars"
+import { Colors, FiguresType } from "../vars"
 import { Figure } from "./Figure"
 
 export class Bishop extends Figure{

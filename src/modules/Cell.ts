@@ -8,6 +8,13 @@ class Cell{
     private available : boolean = false;
     private figure : Figure | null;
 
+    constructor(color : Colors, x : number, y : number, figure : Figure | null = null){
+        this.color = color;
+        this.x = x;
+        this.y = y;
+        this.figure = figure;
+    }
+
     public getCopyCell() : Cell{
         let copyCell = new Cell(this.color, this.x, this.y, this.figure);
         copyCell.available = this.available;
@@ -17,17 +24,19 @@ class Cell{
     public getColor() : Colors{
         return this.color;
     }
-
     public getX() : number{
         return this.x;
     }
     public getY() : number{
         return this.y;
     }
-
     public isAvailable() : boolean{
         return this.available;
     }
+    public getFigure() : Figure | null{
+        return this.figure;
+    }
+
     public makeAvailable() : void{
         this.available = true;
     }
@@ -35,21 +44,11 @@ class Cell{
         this.available = false;
     }
 
-    public getFigure() : Figure | null{
-        return this.figure;
-    }
     public setFigure(figure : Figure) : void{
         this.figure = figure;
     }
     public deleteFigure() : void{
         this.figure = null;
-    }
-
-    constructor(color : Colors, x : number, y : number, figure : Figure | null = null){
-        this.color = color;
-        this.x = x;
-        this.y = y;
-        this.figure = figure;
     }
 }
 

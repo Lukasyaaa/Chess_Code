@@ -1,16 +1,15 @@
 import React, { FC, useEffect, useState, useRef } from "react";
 import "./App.css";
-import { EatedFigures } from "./components/EatedFigures";
 import { Options } from "./components/Options";
+import { Board } from "./components/Board";
+import { EatedFigures } from "./components/EatedFigures";
 import { MovesHistoryWindow } from "./components/MovesHistoryWindow";
 import { LoseWindow } from "./components/LoseWindow";
 import PickerWindow from "./components/PickerWindow";
-import { Board } from "./components/Board";
 import BoardClass from "./modules/Board";
 import { Consent, ListType, FiguresType, list } from "./modules/vars";
 
 export const App : FC = () => {
-
     let [board, setBoard] = useState<BoardClass>(new BoardClass());
     let [whiteTimer, setWhiteTimer] = useState<number>(300);
     let [blackTimer, setBlackTimer] = useState<number>(300);
@@ -37,6 +36,7 @@ export const App : FC = () => {
                 }
                 if(pressedNumber || e.code === "ArrowUp" || e.code === "KeyW" || e.code === "ArrowDown" || e.code === "KeyS" 
                 || e.code === "Enter" || e.code === "Tab"){
+                    e.preventDefault();
                     for(let link of ourList.childNodes){
                         if(link.classList.contains("_active")){
                             if(pressedNumber){
@@ -80,16 +80,6 @@ export const App : FC = () => {
         timer.current = setInterval(callback, 1000);
     }
 
-    useEffect(() =>{
-        decrementTimer();
-    }, [board.getCurrentPlayer()]);
-
-    if(!whiteTimer || !blackTimer || board.getCheckmate() !== null){
-        if(timer.current){
-            clearInterval(timer.current);
-        }
-    }
-
     const restart = () => {
         setIsGaveUp(false);
 
@@ -105,34 +95,20 @@ export const App : FC = () => {
         setPicked(FiguresType.Default);
     }
 
-    const appearPickerWin = (type : ListType) =>{
-        setTypePickerWin(type);
+    useEffect(() =>{
+        decrementTimer();
+    }, [board.getCurrentPlayer()]);
+
+    if(!whiteTimer || !blackTimer || board.getCheckmate() !== null || typePickerWin !== null || isGaveUp){
         if(timer.current){
             clearInterval(timer.current);
         }
     }
+
     const disappearPickerWin = () =>{
         setTypePickerWin(null);
         const callback = ((!board.getCurrentPlayer()) ? decrementBlack : decrementWhite);
         timer.current = setInterval(callback, 1000);
-    }
-
-    const gaveUp = () =>{
-        setIsGaveUp(true);
-        if(timer.current){
-            clearInterval(timer.current);
-        }
-    }
-
-    const appearMoveHistory = () =>{
-        setIsGaveUp(false);
-        setIsNeedMoveHistory(true);
-    }
-    const disappearMoveHistory = () =>{
-        if(board.getCheckmate() === null && whiteTimer && blackTimer){
-            setIsGaveUp(true);
-        }
-        setIsNeedMoveHistory(false);
     }
 
     const figuresList : list = {
@@ -155,15 +131,15 @@ export const App : FC = () => {
     return(
         <React.Fragment>
             <Options 
-                gaveUp={gaveUp} 
-                appearPickerWin={appearPickerWin} 
+                setIsGaveUp={setIsGaveUp} 
+                setTypePickerWin={setTypePickerWin} 
                 buttonsDisabled={board.getHistory().length === 0 || typePickerWin !== null || isGaveUp || isNeedMovesHistory}
                 whiteTimer={whiteTimer}
                 blackTimer={blackTimer} 
             />
             <Board 
                 board = {{value: board, set: setBoard}} 
-                typePickerWin={{value : typePickerWin, set: appearPickerWin}} 
+                typePickerWin={{value : typePickerWin, set: setTypePickerWin}} 
                 choosed={{value : picked, set: setPicked}}
                 isCellsPassive={typePickerWin !== null || isGaveUp || isNeedMovesHistory}
             />
@@ -171,22 +147,22 @@ export const App : FC = () => {
             {board.getCheckmate() !== null && !isNeedMovesHistory && <LoseWindow 
                 heading={(!board.getCheckmate()) ? "Black Checkmate" : "White Checkmate"}
                 restart={restart}
-                appearMoveHistory={appearMoveHistory}
+                setIsNeedMoveHistory={setIsNeedMoveHistory}
             />}
-            {isGaveUp && <LoseWindow 
-                heading={`${(!board.getCurrentPlayer()) ? "Black" : "White"} gave up`} 
+            {isGaveUp && !isNeedMovesHistory && <LoseWindow 
+                heading={(!board.getCurrentPlayer()) ? "Black gave up" : "White gave up"}
                 restart={restart}
-                appearMoveHistory={appearMoveHistory}
+                setIsNeedMoveHistory={setIsNeedMoveHistory}
             />}
             {!whiteTimer && !isNeedMovesHistory && <LoseWindow 
                 heading="White out of Time"
                 restart={restart}  
-                appearMoveHistory={(board.getHistory().length) ? appearMoveHistory : null}
+                setIsNeedMoveHistory={(board.getHistory().length) ? setIsNeedMoveHistory : null}
             />}
             {!blackTimer && !isNeedMovesHistory && <LoseWindow 
                 heading="Black out of Time"
                 restart={restart}   
-                appearMoveHistory={(board.getHistory().length) ? appearMoveHistory : null}         
+                setIsNeedMoveHistory={(board.getHistory().length) ? setIsNeedMoveHistory : null}         
             />}
             {typePickerWin === ListType.Figure && <PickerWindow 
                 ref={chooseList}
@@ -204,7 +180,7 @@ export const App : FC = () => {
             />}
             {isNeedMovesHistory && <MovesHistoryWindow 
                 history={board.getHistory()}
-                close={disappearMoveHistory}
+                setIsNeedMoveHistory={setIsNeedMoveHistory}
             />}
         </React.Fragment>
     )

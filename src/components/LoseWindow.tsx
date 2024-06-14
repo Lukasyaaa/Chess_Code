@@ -3,11 +3,11 @@ import React, { FC, useState } from "react";
 interface LoseWindowProps{
     heading : string,
     restart : () => void;
-    appearMoveHistory: (() => void) | null;
+    setIsNeedMoveHistory: ((newValue : boolean) => void) | null;
 }
 
-export const LoseWindow : FC<LoseWindowProps> = ({heading, restart, appearMoveHistory}) =>{
-    if(appearMoveHistory !== null){
+export const LoseWindow : FC<LoseWindowProps> = ({heading, restart, setIsNeedMoveHistory}) =>{
+    if(setIsNeedMoveHistory !== null){
         return(
             <div className="lose-window modal-win">
                 <h1 className="lose-window__heading modal-win__heading">{heading}</h1>
@@ -20,7 +20,7 @@ export const LoseWindow : FC<LoseWindowProps> = ({heading, restart, appearMoveHi
                     <button
                         type="button" 
                         className="lose-window__button lose-window__show modal-win__button"
-                        onClick={appearMoveHistory}
+                        onClick={() => setIsNeedMoveHistory(true)}
                     >
                     View Moves
                     </button>

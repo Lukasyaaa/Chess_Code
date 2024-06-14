@@ -29,14 +29,14 @@ const PickerWindow : ForwardRefRenderFunction<HTMLUListElement, PickerWindowProp
             <div className="choose choose_figure modal-win">
                 <h2 className="choose__heading choose_figure__heading modal-win__heading">{props.heading}</h2>
                 <ul ref={ref} className="choose__list choose_figure__list modal-win__list" onClick={(e) => clickLink(e)}>
-                    {props.list.items.map((link, index) =>
+                    {props.list.items.map((link, linkNumber) =>
                         <li 
-                            key={index}
-                            className={`choose__link choose_figure__link modal-win__link${((index === 0) ? " _active" : "")}`} 
-                            data-id={index} data-value={link.value}
+                            key={linkNumber}
+                            className={`choose__link choose_figure__link modal-win__link${((!linkNumber) ? " _active" : "")}`} 
+                            data-id={linkNumber} data-value={link.value}
                         >
                             <button type="button">
-                                <img src={srces[index]} alt={link.value} />
+                                <img src={srces[linkNumber]} alt={link.value} />
                                 <span>{link.content}</span>
                             </button>
                         </li>
@@ -50,11 +50,11 @@ const PickerWindow : ForwardRefRenderFunction<HTMLUListElement, PickerWindowProp
         <div className="choose choose_consent modal-win">
             <h2 className="choose__heading choose_consent__heading modal-win__heading">{props.heading}</h2>
             <ul ref={ref} className="choose__list choose_consent__list modal-win__list" onClick={(e) => clickLink(e)}>
-                {props.list.items.map((link, index) =>
+                {props.list.items.map((link, linkNumber) =>
                     <li 
-                        key={index}
-                        className={`choose__link choose_consent__link modal-win__link${((index === 0) ? " _active" : "")}`} 
-                        data-id={index} data-value={link.value}
+                        key={linkNumber}
+                        className={`choose__link choose_consent__link modal-win__link${((!linkNumber) ? " _active" : "")}`} 
+                        data-id={linkNumber} data-value={link.value}
                     >
                         <button type="button">{link.content}</button>
                     </li>

@@ -2,15 +2,14 @@ import React, { FC } from "react";
 import { ListType } from "../modules/vars";
 
 interface OptionsProps{
-    gaveUp : () => void;
-    appearPickerWin : (type : ListType) => void;
+    setIsGaveUp : (newValue : boolean) => void;
+    setTypePickerWin : (type : ListType) => void;
     buttonsDisabled : boolean;
     whiteTimer : number;
     blackTimer : number;
 }
 
-export const Options : FC<OptionsProps> = ({gaveUp, appearPickerWin, buttonsDisabled, whiteTimer, blackTimer}) =>{
-
+export const Options : FC<OptionsProps> = ({setIsGaveUp, setTypePickerWin, buttonsDisabled, whiteTimer, blackTimer}) =>{
     if(buttonsDisabled){
         return(
             <div className="options _not-active">
@@ -46,13 +45,13 @@ export const Options : FC<OptionsProps> = ({gaveUp, appearPickerWin, buttonsDisa
                     tabIndex={1}
                     className="options__button options__draw" 
                     type="button" 
-                    onClick={() => appearPickerWin(ListType.Consent)}
+                    onClick={() => setTypePickerWin(ListType.Consent)}
                 >Offer a draw</button>
                 <button 
                     tabIndex={2}
                     className="options__button options__give-up" 
                     type="button" 
-                    onClick={gaveUp}
+                    onClick={() => setIsGaveUp(true)}
                 >Give up</button>
             </div>
         </div>
