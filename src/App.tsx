@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useState, useRef } from "react";
 import "./App.css";
 import { Options } from "./components/Options";
-import { Board } from "./components/Board";
+import Board from "./components/Board";
 import { EatedFigures } from "./components/EatedFigures";
 import { MovesHistoryWindow } from "./components/MovesHistoryWindow";
 import { LoseWindow } from "./components/LoseWindow";
@@ -80,8 +80,19 @@ export const App : FC = () => {
         timer.current = setInterval(callback, 1000);
     }
 
+    const cellsList = useRef<HTMLUListElement>(null);
     const restart = () => {
         setIsGaveUp(false);
+        if(cellsList.current && document.hasFocus()){
+            const ourList : any = cellsList.current;
+            for(let link of ourList.childNodes){
+                if(link.classList.contains("_active")){
+                    link.classList.remove("_active");
+                    link.blur();
+                    break;
+                }
+            }
+        }
 
         const board : BoardClass = new BoardClass();
         setBoard(board);
@@ -138,6 +149,7 @@ export const App : FC = () => {
                 blackTimer={blackTimer} 
             />
             <Board 
+                ref={cellsList}
                 board = {{value: board, set: setBoard}} 
                 typePickerWin={{value : typePickerWin, set: setTypePickerWin}} 
                 choosed={{value : picked, set: setPicked}}

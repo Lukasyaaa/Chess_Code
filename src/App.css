@@ -84,6 +84,10 @@ ul{
     font-size: 22px;
     color: #6A4026;
 }
+.options__timer:first-child{
+    margin-right: 10px;
+}
+
 @media (max-width: 992px) {
     .options__timer{
         font-size: 20px;
@@ -94,11 +98,6 @@ ul{
         font-size: 18px;
     }
 }
-
-.options__timer:first-child{
-    margin-right: 10px;
-}
-
 .options__buttons{
     display: flex;
     flex-direction: column;
@@ -113,8 +112,8 @@ ul{
 .options__button:focus{
     outline: none;
 }
-.options__button:focus.options__button::after{
-    border-width: 5px;
+.options:not(._not-active) .options__button{
+    cursor: pointer;
 }
 .options__button{
     position: relative;
@@ -127,8 +126,12 @@ ul{
     font-weight: 400;
     font-size: 20px;
     color: #fff;
-
-    cursor: pointer;
+}
+.options._not-active .options__button{
+    opacity: 0.9;
+}
+.options__button:first-child{
+    margin-bottom: 10px;
 }
 @media (max-width: 992px) {
     .options__button{
@@ -141,6 +144,9 @@ ul{
     }
 }
 
+.options__button:focus.options__button::after{
+    border-width: 5px;
+}
 .options__button::after{
     content: "";
 
@@ -157,13 +163,6 @@ ul{
     top: 0;
 
     transition: border-width 0.3s linear;
-}
-.options._not-active .options__button{
-    cursor: default;
-    opacity: 0.9;
-}
-.options__button:first-child{
-    margin-bottom: 10px;
 }
 
 .board{
@@ -187,18 +186,16 @@ ul{
     }
 }
 
-.board__coordline.horizontal{
+.board__coordline{
     display: flex;
     justify-content: center;
-
+}
+.board__coordline.horizontal{
     text-align: center;
     grid-area: horiz;
 }
 .board__coordline.vertical{
-    display: flex;
     flex-direction: column;
-    justify-content: center;
-
     grid-area: ver;
 }
 
@@ -218,7 +215,7 @@ ul{
         font-size: 16px;
     }
 }
-@media (max-width: 480px) {
+@media (max-width: 320px) {
     .coordline-board__item{
         font-size: 14px;
     }
@@ -236,6 +233,9 @@ ul{
 
     grid-area: turn;
 }
+.board._white-turn .board__heading_turn{
+    color: #F6DBB4;
+}
 @media (max-width: 992px) {
     .board__heading_turn{
         font-size: 30px;
@@ -245,10 +245,6 @@ ul{
     .board__heading_turn{
         font-size: 25px;
     }
-}
-
-.board._white-turn .board__heading_turn{
-    color: #F6DBB4;
 }
 
 .board__game{
@@ -292,6 +288,9 @@ ul{
     transition: border-color 0.3s linear,
     box-shadow 0.3s linear;
 }
+.game-board__link button:focus{
+    outline: none;
+}
 .game-board__link.black button{
     border: 5px solid #6A4026;
     background-color: #6A4026;
@@ -300,9 +299,6 @@ ul{
     .game-board__link.black button{
         border: 3px solid #6A4026;
     }
-}
-.game-board__link button:focus{
-    outline: none;
 }
 .game-board__link.white button{
     border: 5px solid #F6DBB4;
@@ -328,7 +324,7 @@ ul{
 
     transition: filter 0.3s linear;
 }
-@media (max-width: 480px) {
+@media (max-width: 320px) {
     .game-board__link:not(._has-figure)._available button::after{
         width: 8px;
         height: 8px;
@@ -403,7 +399,6 @@ ul{
 
     display: grid;
     grid-template-rows: 1fr 1fr;
-    height: 430.6px;
 }
 @media (max-width: 992px) and (min-width: 769px) {
     .eated-figures{
@@ -414,6 +409,7 @@ ul{
 @media (max-width: 768px) {
     .eated-figures{
         margin-top: 25px;
+        height: 430.6px;
     }
 }
 @media (max-width: 480px) {
@@ -430,6 +426,9 @@ ul{
 
     margin-bottom: 15px;
 }
+.item_black-eated-figures__heading{
+    color: #000;
+}
 @media (max-width: 992px) {
     .item-eated-figures__heading{
         font-size: 25px;
@@ -439,10 +438,6 @@ ul{
     .item-eated-figures__heading{
         font-size: 20px;
     }
-}
-
-.item_black-eated-figures__heading{
-    color: #000;
 }
 
 .item-eated-figures__list{
@@ -511,6 +506,11 @@ ul{
 @media (max-width: 992px) {
     .modal-win{
         padding: 50px 15px;
+    }
+}
+@media (max-width: 480px) {
+    .modal-win{
+        padding: 35px 15px;
     }
 }
 
@@ -615,9 +615,7 @@ ul{
     box-shadow: 0 0 5px #fff;
 }
 @media (max-width: 768px) {
-    .modal-win__buttons{
-        width: 100%;
-    }
+    .modal-win__buttons,
     .modal-win__button{
         width: 100%;
     }
@@ -705,8 +703,8 @@ ul{
     left: 50%;
     top: 50%;
 
-    width: 85%;
-    height: 85%;
+    width: 90%;
+    height: 90%;
 
     transform: translate(-50%, -50%);
 }
